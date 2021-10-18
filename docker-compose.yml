@@ -1,0 +1,43 @@
+version: '2'
+services:
+
+  # Primary Vault server
+  vault_primary:
+    # Uses a Docker image based on the official Vault image
+    # See Dockerfile
+    build: .
+    cap_add:
+    - IPC_LOCK
+    ports:
+    - 8200:8200
+    - 8201:8201
+    volumes:
+    - ./:/tmp/workdir:ro
+    working_dir: /tmp/workdir
+    environment:
+    - "VAULT_LICENSE=${VAULT_LICENSE}"
+    command:
+    - server
+    - -config
+    - vault.conf/config.hcl
+  # Secondary Vault server
+  vault_secondary:
+    # Uses a Docker image based on the official Vault image
+    # See Dockerfile
+    build: .
+    cap_add:
+    - IPC_LOCK
+    ports:
+    - 8300:8200
+    - 8301:8201
+    volumes:
+    - ./:/tmp/workdir:ro
+    working_dir: /tmp/workdir
+    environment:
+    - "VAULT_LICENSE=${VAULT_LICENSE}"
+    command:
+    - server
+    - -config
+    - vault.conf/config_secondary.hcl
+    links:
+    - vault_primary:vault_primary
